@@ -63,7 +63,7 @@ static void on_display(void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-			gluLookAt(0, 30, 0, 0, 0, -15, 0, 1, 0);
+			gluLookAt(2, 35, 0, 2, 0, -15, 0, 1, 0);
 
 
   int i, j;
@@ -95,8 +95,15 @@ static void on_display(void) {
       glPushMatrix();
       glColor3f(256/196, 256/173, 0);
         glTranslatef(x_cord*i, 0, -j*y_cord);
-        glScalef(x_cord, 1, y_cord);
+        //glScalef(x_cord, 1, y_cord);
         glutSolidSphere(.5, 100, 100);
+      glPopMatrix();
+    } else {
+      glPushMatrix();
+        glColor3f(1, 0, 0);
+        glTranslatef(i, 0, -j);
+        glRotatef(30, 0, 1, 0);
+        glutSolidCube(0.25);
       glPopMatrix();
     }
       }
@@ -115,11 +122,13 @@ static void on_keyboard(unsigned char key, int x, int y) {
 
       case 'w':
       case 'W':
-        y_cord += 1;
+        y_cord += .1;
+        printf("w stisnuto\n");
         break;
 
         case 'd':
-        x_cord += 1;
+        printf("d stisnuto \n");
+        x_cord += .1;
         break;
   }
 }
