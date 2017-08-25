@@ -3,7 +3,7 @@
 #include <GL/glut.h>
 #include "draw.h"
 
-#define WINDOW_HEIGHT 700
+#define WINDOW_HEIGHT 600
 #define WINDOW_WIDTH 900
 
 #define MAP_WIDTH 26
@@ -13,7 +13,7 @@
 #define EPSILON 0.01
 
 static int window_width, window_height;
-static char map[MAP_HEIGHT][MAP_WIDTH];
+int map[MAP_HEIGHT][MAP_WIDTH];
 
 /* Deklaracija callback funkcija */
 static void on_display(void);
@@ -23,8 +23,10 @@ static void on_reshape(int width, int height);
 /* Deklaracija pomocnih funkcija */
 void get_map_pattern();
 
-int x_cord = 1;
-int y_cord = 1;
+int x_player = 3;
+int y_player = 0;
+int z_player = -3;
+int rotate = 0;
 
 int main(int argc, char** argv) {
   /* Ucitavanje map patterna */
@@ -32,11 +34,11 @@ int main(int argc, char** argv) {
 
   /* GLUT inicijalizacija */
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+  glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 
   /* Kreiranje prozora */
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-  glutInitWindowPosition(300, 100);
+  glutInitWindowPosition(100, 100);
   glutCreateWindow("3D Pacman Game");
 
   /* Registracija callback funkcija */
@@ -45,7 +47,7 @@ int main(int argc, char** argv) {
   glutReshapeFunc(on_reshape);
 
   /* OpenGL inicijalizacija */
-  glClearColor(0, 0, 0, 0);
+  glClearColor(0.1, 0.1, 0.1, 1);
   glEnable(GL_DEPTH_TEST);
 
   /* Pokretanje glavne petlje */
@@ -55,61 +57,56 @@ int main(int argc, char** argv) {
 }
 
 static void on_display(void) {
+  GLfloat light_position[] = { 20, 40, -10, 0 };
+
+
 
   /* Brisanje prethodnog sadrzaja prozora */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+  GLfloat light_ambient[] = {0.1, 0.1, 0.1, 1};
+GLfloat light_diffuse[] = {1, 1, 1, 1};
+glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+
+GLfloat shiness = 20;
+glMaterialf(GL_FRONT, GL_SHININESS, shiness);
+
+
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
 
   /* Podesavanje vidne tacke */
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-			gluLookAt(2, 35, 0, 2, 0, -15, 0, 1, 0);
+  gluLookAt(20, 40, -3, 20, 5, -18, 0, 1, 0);
+  			int i, j;
+  			for(i = 0; i < MAP_HEIGHT; i++){
+  				for(j = 0; j < MAP_WIDTH; j++){
+  					if(map[i][j] == 0){
+  						draw_blue_cube(2*i, 2*(i + 1), -1, 0, -2*j, -2*(j + 1));
+  					}
+  					else if(map[i][j] == 2 || map[i][j] == 1){
+  						draw_floor(2*i, 2*(i + 1), -1, -2*j, -2*(j + 1));
+              if(map[i][j] == 1)
+              {
 
+              glPushMatrix();
+                glColor3f(0.5, 0.5, 0.2);
+                glTranslatef(2*i+1, 0, -2*j-1);
+                glRotatef(45, 1, 1, 1);
+                glutSolidCube(0.5);
+              glPopMatrix();
+  					}
+          }
+  				}
+  			}
 
-  int i, j;
-  int pacman_drawn = 0;
-
-  for(i = 1; i <= MAP_HEIGHT; i++) {
-    for(j = 1; j <= MAP_WIDTH; j++) {
-      if(map[i-1][j-1] == 'o') {
-        //draw_blue_cube(0.4*i, 0.4*(i+1), -0.2, 0.2, -0.4*j, -0.4*(j+1));
-        // draw_blue_cube(0.2*i, 0.2*(i+1), -0.1, 0.1, -0.2*j, -0.2*(j+1));
-      	glPushMatrix();
-                glTranslatef(i, 0, -j);
-                glColor3f(0, 0, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-      }
-      else if(map[i-1][j-1] == 'x') {
-        //draw_floor(0.4*i, 0.4*(i+1), -0.2, -0.4*j, -0.4*(j+1));
-        glPushMatrix();
-        glTranslatef(i, 0, -j);
-        glColor3f(256/226, 256/219, 256/172);
-		glScalef(1, 0.001, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-
-    if(pacman_drawn == 0)
-    {
-      pacman_drawn = 1;
-      glPushMatrix();
-      glColor3f(256/196, 256/173, 0);
-        glTranslatef(x_cord*i, 0, -j*y_cord);
-        //glScalef(x_cord, 1, y_cord);
-        glutSolidSphere(.5, 100, 100);
-      glPopMatrix();
-    } else {
-      glPushMatrix();
-        glColor3f(1, 0, 0);
-        glTranslatef(i, 0, -j);
-        glRotatef(30, 0, 1, 0);
-        glutSolidCube(0.25);
-      glPopMatrix();
-    }
-      }
-    }
-  }
-
+        draw_player(x_player, y_player, z_player, 0.9, rotate);
   /* Update slike */
   glutSwapBuffers();
 }
@@ -122,15 +119,50 @@ static void on_keyboard(unsigned char key, int x, int y) {
 
       case 'w':
       case 'W':
-        y_cord += .1;
-        printf("w stisnuto\n");
+        if(-1*(z_player)/2 == MAP_HEIGHT+1)
+          z_player += 2*MAP_HEIGHT+4;
+      if(map[x_player/2][-1*(z_player-2)/2] != 0)
+      {
+          z_player -= 2;
+          rotate += 10;
+          //map[3][-3]
+          //map[3][-4]
+          map[x_player/2][-1*(z_player)/2] = 2;
+}
         break;
+        case 's':
+        case 'S':
+
+          if(-1*(z_player)/2 == 0)
+            z_player -= 2*MAP_HEIGHT+4;
+        if(map[x_player/2][-1*(z_player+2)/2] != 0)
+        {
+          z_player += 2;
+          map[x_player/2][-1*(z_player)/2] = 2;
+}
+          break;
 
         case 'd':
+        if(map[(x_player+2)/2][-1*(z_player)/2] !=0)
+        {
         printf("d stisnuto \n");
-        x_cord += .1;
+
+        x_player += 2;
+        map[x_player/2][-1*(z_player)/2] = 2;
+}
+        break;
+
+        case 'a':
+        if(map[(x_player-2)/2][-1*z_player/2] != 0)
+        {
+        printf("d stisnuto \n");
+        x_player -= 2;
+        map[x_player/2][-1*(z_player)/2] = 2;
+}
         break;
   }
+  glutPostRedisplay();
+
 }
 
 static void on_reshape(int width, int height) {
@@ -139,16 +171,13 @@ static void on_reshape(int width, int height) {
 
   /* Podesava se viewport. */
   glViewport(0, 0, window_width, window_height);
-//   /* Podesavanje projekcije */
-//   glMatrixMode(GL_PROJECTION);
-//   glLoadIdentity();
-//   gluPerspective(80, window_width/(float)window_height, 1, 100);
 
-  	glViewport(0, 0, width, height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60, width/(double)height, 1, 100);
+  /* Podesavanje projekcije */
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(60, window_width / (float)window_height, 1, 100);
 }
+
 void get_map_pattern() {
   FILE* file;
   if((file = fopen("map.txt", "r")) == NULL) {
@@ -160,7 +189,9 @@ void get_map_pattern() {
   int i, j;
   for(i = 0; i < MAP_HEIGHT; i++) {
     for(j = 0; j < MAP_WIDTH; j++) {
-      fscanf(file, "%c", &map[i][j]);
+      char temp;
+      fscanf(file, "%c", &temp);
+      map[i][j] = temp - '0';
     }
   }
 }
