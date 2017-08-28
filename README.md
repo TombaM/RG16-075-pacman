@@ -6,4 +6,4 @@ Game controls:
 - 's' - down
 - 'd' - down
 
-Goal is to collect all the food on the map and to avoid enemy so you could keep going.
+Try to collect as much food as possible with avoiding enemy on the map so you don't lose.
