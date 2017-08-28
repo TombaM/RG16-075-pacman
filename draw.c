@@ -52,6 +52,7 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 {
 	GLfloat diffuse_coeffs[] = { 1, 1, 0, 1 };
 	GLfloat ambient_coeffs[] = {1, 1, 0, 1};
+
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -60,6 +61,61 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 		glRotatef(rotation, 0, 1, 0);
 		glPopMatrix();
 		glTranslatef(x_cord, y_cord, z_cord);
+		glPushMatrix();
+			glDisable(GL_LIGHTING);
+			glColor3f(0, 0, 0);
+			glTranslatef(0, 1, .5);
+			glScalef(1, .5, .02);
+			glutSolidSphere(size_of_player*.5, 100, 100);
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
+		glPushMatrix();
+			glDisable(GL_LIGHTING);
+			glColor3f(1, 1, 1);
+			glTranslatef(-.5, 1, 0);
+			glPushMatrix();
+				glColor3f(0, 0, 0);
+				glTranslatef(0, .3, 0);
+				glutSolidSphere(size_of_player*.1, 100, 100);
+				glColor3f(1, 1, 1);
+			glPopMatrix();
+			glutSolidSphere(size_of_player*.2, 100, 100);
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
+		glPushMatrix();
+			glDisable(GL_LIGHTING);
+			glTranslatef(.5, 1, 0);
+			glPushMatrix();
+				glColor3f(0, 0, 0);
+				glTranslatef(0, .3, 0);
+				glutSolidSphere(size_of_player*.1, 100, 100);
+				glColor3f(1, 1, 1);
+			glPopMatrix();
+			glutSolidSphere(size_of_player*.2, 100, 100);
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
 		glutSolidSphere(size_of_player, 100, 100);
+	glPopMatrix();
+}
+
+void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy)
+{
+	GLfloat diffuse_coeffs[] = { .7, 0, .9, 1 };
+	GLfloat ambient_coeffs[] = {.5, 0, .9, 1};
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+		glColor3f(1, 0, 0);
+		glTranslatef(x_cord, y_cord, z_cord);
+			glPushMatrix();
+				glTranslatef(-.5, 1, 0);
+				glutSolidSphere(size_of_enemy*.2, 100, 100);
+			glPopMatrix();
+			glPushMatrix();
+				glTranslatef(.5, 1, 0);
+				glutSolidSphere(size_of_enemy*.2, 100, 100);
+			glPopMatrix();
+			glutSolidSphere(size_of_enemy *.4, 100, 100);
+		glPopMatrix();
 	glPopMatrix();
 }
