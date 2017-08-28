@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include "draw.h"
 
+/* Funkcija za iscrtavanje zidova */
 void draw_wall(float x, float y, float z)
 {
 	GLfloat diffuse_coeffs[] = { 0, .2, .9, 1 };
@@ -17,6 +18,7 @@ void draw_wall(float x, float y, float z)
 	glPopMatrix();
 }
 
+/* Funkcija za iscrtavanje podloge */
 void draw_floor(float x, float y, float z)
 {
 	GLfloat diffuse_coeffs[] = { 1, 1, 1, 1 };
@@ -31,6 +33,7 @@ void draw_floor(float x, float y, float z)
 	glPopMatrix();
 }
 
+/* Funkcija za iscrtavanje hrane po mapi */
 void draw_food(float x_cord_translate, float y_cord_translate, float z_cord_translate,
 							 float x_cord_rotate, float y_cord_rotate, float z_cord_rotate,
 							 float angle_of_rotation, float size_of_cube)
@@ -48,6 +51,7 @@ void draw_food(float x_cord_translate, float y_cord_translate, float z_cord_tran
 	glPopMatrix();
 }
 
+/* Funkcija za iscrtavanje igraca */
 void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player, int rotation)
 {
 	GLfloat diffuse_coeffs[] = { 1, 1, 0, 1 };
@@ -61,6 +65,7 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 		glRotatef(rotation, 0, 1, 0);
 		glPopMatrix();
 		glTranslatef(x_cord, y_cord, z_cord);
+		/* Iscrtavanje usta */
 		glPushMatrix();
 			glDisable(GL_LIGHTING);
 			glColor3f(0, 0, 0);
@@ -69,6 +74,7 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 			glutSolidSphere(size_of_player*.5, 100, 100);
 			glEnable(GL_LIGHTING);
 		glPopMatrix();
+		/* Iscrtavanje ociju */
 		glPushMatrix();
 			glDisable(GL_LIGHTING);
 			glColor3f(1, 1, 1);
@@ -82,6 +88,7 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 			glutSolidSphere(size_of_player*.2, 100, 100);
 			glEnable(GL_LIGHTING);
 		glPopMatrix();
+		/* Iscrtavanje ociju */
 		glPushMatrix();
 			glDisable(GL_LIGHTING);
 			glTranslatef(.5, 1, 0);
@@ -94,10 +101,12 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 			glutSolidSphere(size_of_player*.2, 100, 100);
 			glEnable(GL_LIGHTING);
 		glPopMatrix();
+		/* Iscrtavanje samog igraca */
 		glutSolidSphere(size_of_player, 100, 100);
 	glPopMatrix();
 }
 
+/* Funkcija za iscrtavanje neprijatelja */
 void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy)
 {
 	GLfloat diffuse_coeffs[] = { .7, 0, .9, 1 };
