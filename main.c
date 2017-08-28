@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <GL/glut.h>
 #include "draw.h"
 
@@ -23,6 +24,7 @@ static void on_reshape(int width, int height);
 /* Deklaracija pomocnih funkcija */
 void get_map_pattern();
 void light();
+void show_score();
 
 int x_player = 3;
 int y_player = 0;
@@ -92,6 +94,8 @@ static void on_display(void) {
 
   draw_player(x_player, y_player, z_player, 0.9, rotate);
 
+  show_score();
+
   /* Update slike */
   glutSwapBuffers();
 }
@@ -104,55 +108,67 @@ static void on_keyboard(unsigned char key, int x, int y) {
 
       case 'w':
       case 'W':
+        /* Omogucavanje teleportovanja igraca, kada dodje do vrha mape */
         if(-1*(z_player)/2 == MAP_HEIGHT+1)
           z_player += 2*MAP_HEIGHT+4;
-      if(map[x_player/2][-1*(z_player-2)/2] != 0)
-      {
+
+        if(map[x_player/2][-1*(z_player-2)/2] != 0)
+        {
           z_player -= 2;
-          rotate += 10;
-          //map[3][-3]
-          //map[3][-4]
+
+          /* Provera da li se na planiranom potezu nalazi hrana i azuriranje score-a */
+          if(map[x_player/2][-1*(z_player)/2] == 1)
+            score++;
+
           map[x_player/2][-1*(z_player)/2] = 2;
-          score++;
-}
+        }
         break;
+
         case 's':
         case 'S':
-
+          /* Omogucavanje teleportovanja igraca, kada dodje do dna mape */
           if(-1*(z_player)/2 == 0)
             z_player -= 2*MAP_HEIGHT+4;
-        if(map[x_player/2][-1*(z_player+2)/2] != 0)
-        {
-          z_player += 2;
-          map[x_player/2][-1*(z_player)/2] = 2;
-          score++;
-}
+
+          if(map[x_player/2][-1*(z_player+2)/2] != 0)
+          {
+            z_player += 2;
+
+            if(map[x_player/2][-1*(z_player)/2] == 1)
+              score++;
+
+            map[x_player/2][-1*(z_player)/2] = 2;
+          }
           break;
 
         case 'd':
-        if(map[(x_player+2)/2][-1*(z_player)/2] !=0)
-        {
-        printf("d stisnuto \n");
+        case 'D':
+          if(map[(x_player+2)/2][-1*(z_player)/2] !=0)
+          {
+            x_player += 2;
 
-        x_player += 2;
-        map[x_player/2][-1*(z_player)/2] = 2;
-        score++;
-}
+            if(map[x_player/2][-1*(z_player)/2] == 1)
+              score++;
+
+            map[x_player/2][-1*(z_player)/2] = 2;
+        }
         break;
 
         case 'a':
-        if(map[(x_player-2)/2][-1*z_player/2] != 0)
-        {
-        printf("d stisnuto \n");
-        x_player -= 2;
-        map[x_player/2][-1*(z_player)/2] = 2;
-        score++;
-}
+        case 'A':
+          if(map[(x_player-2)/2][-1*z_player/2] != 0)
+          {
+            x_player -= 2;
+
+            if( map[x_player/2][-1*(z_player)/2] == 1)
+              score++;
+
+            map[x_player/2][-1*(z_player)/2] = 2;
+        }
         break;
   }
-  printf("%i\n", score);
-  glutPostRedisplay();
 
+  glutPostRedisplay();
 }
 
 static void on_reshape(int width, int height) {
@@ -204,4 +220,18 @@ void light()
   GLfloat light_position[] = { 0, 0, 10, 0 };
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
+}
+
+void show_score()
+{
+  /* Ucitavamo trenutni score */
+  char buff[256];
+  sprintf(buff, "%i", score);
+
+  glColor3f(1,1,1);
+  glDisable(GL_LIGHTING); // Kako bi se dobila zeljena boja neophodno je iskljuciti osvetljenje
+ 	glRasterPos3f(48,5.7,-42);
+	glutBitmapString(GLUT_BITMAP_9_BY_15, "SCORE: ");
+  glutBitmapString(GLUT_BITMAP_9_BY_15, buff);
+  glEnable(GL_LIGHTING); // Nakon sto zavrsimo sa prosledjivanjem zeljenog texta, ukljucujemo nazad osvetljenje
 }
