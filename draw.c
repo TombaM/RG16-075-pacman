@@ -8,6 +8,7 @@ void draw_wall(float x, float y, float z)
 {
 	GLfloat diffuse_coeffs[] = { 0.094, 0.000, 0.510, 1 };
 	GLfloat ambient_coeffs[] = {0.294, 0.000, 0.510, 1};
+
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -23,6 +24,7 @@ void draw_floor(float x, float y, float z)
 {
 	GLfloat diffuse_coeffs[] = { 184, 134, 11, 1 };
 	GLfloat ambient_coeffs[] = {184, 134, 11, 1};
+	
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -33,7 +35,7 @@ void draw_floor(float x, float y, float z)
 	glPopMatrix();
 }
 
-/* Funkcija za iscrtavanje hrane po mapi */
+/* Funkcije za iscrtavanje hrane po mapi */
 void draw_food1(float x_cord_translate, float y_cord_translate, float z_cord_translate,
 							 float x_cord_rotate, float y_cord_rotate, float z_cord_rotate,
 							 float angle_of_rotation, float size_of_cube)
@@ -52,6 +54,7 @@ void draw_food1(float x_cord_translate, float y_cord_translate, float z_cord_tra
 	glPopMatrix();
 }
 
+/* Funkcija identicna prvoj, sluzi kao nadogradnja prvoj funkciji, druga boja i rotacija*/
 void draw_food2(float x_cord_translate, float y_cord_translate, float z_cord_translate,
 							 float x_cord_rotate, float y_cord_rotate, float z_cord_rotate,
 							 float angle_of_rotation, float size_of_cube)
@@ -126,10 +129,13 @@ void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player,
 }
 
 /* Funkcija za iscrtavanje neprijatelja */
-void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy)
+void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy,
+								float r_diff, float g_diff, float b_diff,
+								float r_amb, float g_amb, float b_amb)
 {
-	GLfloat diffuse_coeffs[] = { .1, .9, .1, 1 };
-	GLfloat ambient_coeffs[] = {.5, 0, .9, 1};
+	GLfloat diffuse_coeffs[] = {r_diff, g_diff, b_diff, 1};
+	GLfloat ambient_coeffs[] = {r_amb, g_amb, b_amb, 1};
+
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -167,6 +173,7 @@ void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy)
 				glTranslatef(-.8, -.5, 0);
 				glutSolidSphere(size_of_enemy*.2, 100, 100);
 			glPopMatrix();
+			/* Iscrtavanje ociju */
 			glPushMatrix();
 				glDisable(GL_LIGHTING);
 				glColor3f(0, 0, 0);
@@ -183,6 +190,7 @@ void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy)
 				glutSolidSphere(size_of_enemy*.1, 100, 100);
 				glEnable(GL_LIGHTING);
 			glPopMatrix();
+			/* Iscrtavanje tela neprijatelja*/
 			glScalef(1, 2, 1);
 			glutSolidSphere(size_of_enemy *.4, 100, 100);
 		glPopMatrix();

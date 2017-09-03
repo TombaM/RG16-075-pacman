@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <GL/glut.h>
 #include "draw.h"
 
 #define WINDOW_HEIGHT 600
@@ -31,8 +28,10 @@ typedef struct
   float z_cord;
   char movement;
 } m_Player;
+/* Definisemo igraca sa inicijalnim koordinatama i pravcem kretanja */
 m_Player Player = {3, 0, -3, 'w'};
 
+/* Pomocne promenljive koje nam sluze kao indikator kretanja igraca */
 int player_horizontal = 0;
 int player_vertical = 0;
 
@@ -44,6 +43,7 @@ typedef struct _enemy
   float z_cord;
   char movement;
 } m_Enemy;
+/* Definisiemo konkretne neprijatelje sa inicijalnim koordinatama i pravcima kretanja */
 m_Enemy Enemy1 = {23, 0, -19, 'w'};
 m_Enemy Enemy2 = {23, 0, -31, 's'};
 m_Enemy Enemy3 = {23, 0, -25, 'a'};
@@ -59,14 +59,15 @@ void enemy_direction(m_Enemy* enemy);
 void move_enemy(m_Enemy* enemy);
 void move_player();
 
-int rotate = 0;
+/* Deklaracija neophodnih parametara u vidu globalnih promenljivih */
+/* Promenljiva koja cuva rezultat */
 int score = 0;
+/*Indikator da li je igra aktivna ili pauzirana */
 int game_started = 0;
-int camera = 0;
-
+/* Parametar za animacije*/
+int animation_parameter = 0;
 /* Indikator za kraj igre */
 int over = 0;
-int p;
 
 int main(int argc, char** argv) {
   /* Ucitavanje map patterna */
@@ -79,7 +80,7 @@ int main(int argc, char** argv) {
 
   /* Kreiranje prozora */
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-  glutInitWindowPosition(100, 100);
+  glutInitWindowPosition(200, 100);
   glutCreateWindow("3D Pacman Game");
 
   /* Registracija callback funkcija */
@@ -107,13 +108,12 @@ static void on_display(void) {
   /* Podesavanje vidne tacke */
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+  gluLookAt(20, 40, -5, 20, 5, -18, 0, 1, 0);
 
-  gluLookAt(20, 40, -5-camera, 20, 5, -18, 0, 1, 0);
-
-  /* Ukoliko je igra aktivna */
+  /* Ukoliko je igra nije zavrsena */
   if(over == 0)
   {
-  	int i, j;
+    int i, j;
 
   	for(i = 0; i < MAP_HEIGHT; i++)
     {
@@ -129,17 +129,17 @@ static void on_display(void) {
 
           if(map[i][j] == 1)
           {
-            draw_food1(2*i+1, -1, -2*j-1.2, 0, 1, 1, p*2, 0.5);
-            draw_food2(2*i+1, -1, -2*j-1.2, 0, 1, 1, p*2, 0.5);
+            draw_food1(2*i+1, -1, -2*j-1.2, 0, 1, 1, animation_parameter*2, 0.5);
+            draw_food2(2*i+1, -1, -2*j-1.2, 0, 1, 1, animation_parameter*2, 0.5);
           }
 		    }
 	    }
     }
 
-    draw_player(Player.x_cord, Player.y_cord, Player.z_cord, 1, rotate + p, p);
-    draw_enemy(Enemy1.x_cord, Enemy1.y_cord, Enemy1.z_cord, 2);
-    draw_enemy(Enemy2.x_cord, Enemy2.y_cord, Enemy2.z_cord, 2);
-    draw_enemy(Enemy3.x_cord, Enemy3.y_cord, Enemy3.z_cord, 2);
+    draw_player(Player.x_cord, Player.y_cord, Player.z_cord, 1, animation_parameter, animation_parameter);
+    draw_enemy(Enemy1.x_cord, Enemy1.y_cord, Enemy1.z_cord, 2, .1, .9, .1, .5, 0, .9);
+    draw_enemy(Enemy2.x_cord, Enemy2.y_cord, Enemy2.z_cord, 2, .8, 0, .5, .8, 0, .4);
+    draw_enemy(Enemy3.x_cord, Enemy3.y_cord, Enemy3.z_cord, 2, .8, .8, .8, .8, .8, .8);
     show_score();
   }
   /* Ukoliko se igrac i neprijatelj nalaze na istoj poziciji i ukoliko vise nema hrane na mapi, igra je gotova */
@@ -171,10 +171,12 @@ static void on_timer(int parameter)
   if(parameter != 0)
     return;
 
+  /* Ukoliko je igra aktivna azuriramo parametar za animacije */
   if(game_started == 1)
-    p += 1;
+    animation_parameter += 1;
 
   check_end();
+
   move_player();
   move_enemy(&Enemy1);
   move_enemy(&Enemy2);
@@ -184,52 +186,6 @@ static void on_timer(int parameter)
 
   if(game_started)
     glutTimerFunc(10, on_timer, 0);
-}
-
-
-static void on_keyboard(unsigned char key, int x, int y) {
-  switch(key) {
-    case 27:
-      exit(0);
-      break;
-
-      case 32:
-        if(!game_started)
-        {
-          glutTimerFunc(10, on_timer, 0);
-          game_started = 1;
-        }
-        break;
-
-      case 'h':
-      case 'H':
-        game_started = 0;
-        break;
-
-      case 'w':
-      case 'W':
-        Player.movement = 'w';
-        break;
-
-      case 's':
-      case 'S':
-        Player.movement = 's';
-        break;
-
-      case 'd':
-      case 'D':
-        Player.movement = 'd';
-        break;
-
-      case 'a':
-      case 'A':
-        Player.movement = 'a';
-        break;
-      case 'm':
-        camera++;
-        break;
-  }
-  glutPostRedisplay();
 }
 
 static void on_reshape(int width, int height) {
@@ -243,6 +199,72 @@ static void on_reshape(int width, int height) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(60, window_width / (float)window_height, 1, 100);
+}
+
+static void on_keyboard(unsigned char key, int x, int y) {
+  switch(key) {
+    /* ESC */
+    case 27:
+      exit(0);
+      break;
+
+    /* Space */
+    case 32:
+      /* Start game */
+      if(!game_started)
+      {
+        glutTimerFunc(10, on_timer, 0);
+        game_started = 1;
+      }
+      /* Pause */
+      else
+        game_started = 0;
+      break;
+
+    case 'w':
+    case 'W':
+      if(game_started)
+        Player.movement = 'w';
+      break;
+
+    case 's':
+    case 'S':
+      if(game_started)
+        Player.movement = 's';
+      break;
+
+    case 'd':
+    case 'D':
+      if(game_started)
+        Player.movement = 'd';
+      break;
+
+    case 'a':
+    case 'A':
+      if(game_started)
+        Player.movement = 'a';
+      break;
+  }
+  glutPostRedisplay();
+}
+
+/* Funkcija u kojoj se podesavaju parametri osvetljenja*/
+void light()
+{
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+
+  GLfloat light_ambient[] = {0.1, 0.1, 0.1, 1};
+  GLfloat light_diffuse[] = {1, 1, 1, 1};
+
+  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+
+  GLfloat shiness = 20;
+  glMaterialf(GL_FRONT, GL_SHININESS, shiness);
+
+  GLfloat light_position[] = { 0, 0, 20, 0 };
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
 /* Ucitavanje matrice kao sablona za mapu za igru */
@@ -263,13 +285,12 @@ void get_map_pattern() {
     }
   }
 
-
-  for(i = 0; i < MAP_HEIGHT; i++) {
-    for(j = 0; j < MAP_WIDTH - 1; j++) {
-        printf("%i ", map[i][j]);
-      }
-      printf("\n");
-  }
+  // for(i = 0; i < MAP_HEIGHT; i++) {
+  //   for(j = 0; j < MAP_WIDTH - 1; j++) {
+  //       printf("%i ", map[i][j]);
+  //     }
+  //     printf("\n");
+  // }
 }
 
 /* Ucitavanje matrice kao sablona za mapu za kraj igre */
@@ -280,10 +301,6 @@ void get_map_over_pattern() {
     exit(1);
   }
 
-  /* Ucitavamo trenutni score */
-  char buff[256];
-  sprintf(buff, "%i", score);
-
   /* Pattern smestamo u matricu */
   int i, j;
   for(i = 0; i < MAP_HEIGHT; i++) {
@@ -293,24 +310,6 @@ void get_map_over_pattern() {
       map_over[i][j] = temp - '0';
     }
   }
-}
-
-/* Funkcija u kojoj se podesavaju parametri osvetljenja*/
-void light()
-{
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-
-  GLfloat light_ambient[] = {0.1, 0.1, 0.1, 1};
-  GLfloat light_diffuse[] = {1, 1, 1, 1};
-  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-
-  GLfloat shiness = 20;
-  glMaterialf(GL_FRONT, GL_SHININESS, shiness);
-
-  GLfloat light_position[] = { 0, 0, 20, 0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
 /* Funkcija koja nam prikazuje trenutni score na mapi */
@@ -345,21 +344,24 @@ void show_exit()
 /* Funkcija koja proverava da li se igrac i neprijatelj nalaze na istoj poziciji */
 void check_end()
 {
-  if(abs(Enemy1.x_cord - Player.x_cord) <= 1 && abs(Enemy1.z_cord - Player.z_cord) <= 1)
+  if(abs(Enemy1.x_cord - Player.x_cord) <=  1 && abs(Enemy1.z_cord - Player.z_cord) <= .8)
     over = 1;
-  if(abs(Enemy2.x_cord - Player.x_cord) <= 1 && abs(Enemy2.z_cord - Player.z_cord) <= 1)
+  if(abs(Enemy2.x_cord - Player.x_cord) <=  1 && abs(Enemy2.z_cord - Player.z_cord) <= .8)
     over = 1;
-  if(abs(Enemy3.x_cord - Player.x_cord) <= 1 && abs(Enemy3.z_cord - Player.z_cord) <= 1)
+  if(abs(Enemy3.x_cord - Player.x_cord) <= 1 && abs(Enemy3.z_cord - Player.z_cord) <= .8)
     over = 1;
 }
 
+/* Funkcija koja odredjuje pravac kretanja neprijatelja */
 void enemy_direction(m_Enemy* enemy)
 {
   /* Promenljiva koja nam odredjuje kretanje neprijatelja */
   int enemy_movement;
 
+  /* Pomocne promenljive za odredjivanje pozicije igraca u odnosu na poziciju neprijatelja */
   int levo = 0;
   int gore = 0;
+
 
   if(Player.x_cord > enemy->x_cord)
     levo = 0;
@@ -371,6 +373,7 @@ void enemy_direction(m_Enemy* enemy)
   else
     gore = 0;
 
+  /* U zavisnosti od toga gde se nalaze neprijatelji u odnosu na igraca, razlicita je verovatnoca za naredno polje na koje ce otici */
   enemy_movement = rand() % 10;
 
   if(levo && gore)
@@ -416,94 +419,119 @@ void enemy_direction(m_Enemy* enemy)
   }
 }
 
+/* Funkcija koja omogucava kretanje igraca */
 void move_player()
 {
+  /* Promenljive koje predstavljaju trenutne koordinate igraca na mapi */
   int player_current_x = floor(Player.x_cord) / 2;
   int player_current_z = floor(-1 * Player.z_cord) / 2;
 
+  /* Update rezultata ukoliko se igrac pokupi hranu */
   if(map[player_current_x][player_current_z] == 1) {
     map[player_current_x][player_current_z] = 2;
     score++;
   }
 
+  /* Promenljive koje ce nam sluziti za proveru validnosti narednog poteza */
   int player_next_x;
   int player_next_z;
 
   if(Player.movement == 'w')
   {
     /* Ovo nam omogucava da se igrac teleportuje ukoliko dodje do gornjeg portala */
-    if(player_current_z == MAP_HEIGHT+1)
-      Player.z_cord = 1;
+    if(player_current_z == MAP_HEIGHT+2)
+      Player.z_cord = 0;
 
     player_next_x = floor(Player.x_cord) / 2;
     player_next_z = floor(-1*(Player.z_cord - 1)) / 2;
-    printf("%i - %i\n%f.2 - %f.2\n%i - %i\n\n\n", player_current_x, player_current_z, Player.x_cord, Player.z_cord, player_next_x, player_next_z);
+
+    // printf("%i - %i\n%f.2 - %f.2\n%i - %i\n\n\n", player_current_x, player_current_z, Player.x_cord, Player.z_cord, player_next_x, player_next_z);
     if(map[player_next_x][player_next_z] != 0)
     {
+      /* Ukoliko igrac moze da se krece na gore, azuriramo koordinate i postavljamo kretanje  na vertikalno */
       Player.z_cord -= .15;
       player_horizontal = 0;
       player_vertical = 1;
     }
     else
+      /* Ukoliko se igrac krece vertikalno i dodje do zida, odbija se o zid i krece se na dole */
       if(player_vertical == 1)
         Player.movement = 's';
   } else if(Player.movement == 's')
   {
     /* Ovo nam omogucava da se igrac teleportuje ukoliko dodje do donjeg portala */
-    if(player_current_z == 0)
-      Player.z_cord -= 2*MAP_HEIGHT+3;
+    if(player_current_z < 0)
+      Player.z_cord -= 2*MAP_HEIGHT+4;
 
     player_next_x = floor(Player.x_cord) / 2;
     player_next_z = floor(-1*(Player.z_cord + 1)) / 2;
+
     if(map[player_next_x][player_next_z] != 0)
     {
+      /* Ukoliko igrac moze da se krece na dole, azuriramo koordinate i postavljamo kretanje  na vertikalno */
       Player.z_cord += .15;
       player_horizontal = 0;
       player_vertical = 1;
     }else
+      /* Ukoliko se igrac krece vertikalno i dodje do zida, odbija se o zid i krece se na gore */
       if(player_vertical == 1)
         Player.movement = 'w';
   } else if(Player.movement == 'd')
   {
     player_next_x = floor(Player.x_cord+1) / 2;
     player_next_z = floor(-1*Player.z_cord) / 2;
+
     if(map[player_next_x][player_next_z] != 0)
     {
+        /* Ukoliko igrac moze da se krece na desno, azuriramo koordinate i postavljamo kretanje  na horizontalno */
         Player.x_cord += .15;
         player_horizontal = 1;
         player_vertical = 0;
     }
     else
+      /* Ukoliko se igrac krece horizontalno i dodje do zida, odbija se o zid i krece se na levo */
       if(player_horizontal == 1)
         Player.movement = 'a';
   } else if(Player.movement == 'a')
   {
     player_next_x = floor(Player.x_cord - 1) / 2;
     player_next_z = floor(-1*Player.z_cord) / 2;
+
     if(map[player_next_x][player_next_z] != 0)
     {
+      /* Ukoliko igrac moze da se krece na levo, azuriramo koordinate i postavljamo kretanje  na horizontalno */
       Player.x_cord -= .15;
       player_horizontal = 1;
       player_vertical = 0;
     }else
+      /* Ukoliko se igrac krece horizontalno i dodje do zida, odbija se o zid i krece se na desno */
       if(player_horizontal == 1)
         Player.movement = 'd';
   }
 }
 
+/* Funkcija koja omogucava kretanje neprijatelja po mapi */
 void move_enemy(m_Enemy* enemy)
 {
   int enemy_next_x;
   int enemy_next_z;
 
+  int enemy_current_z = floor(-1 * enemy->z_cord) / 2;
+
   if(enemy->movement == 'w')
   {
+    /* Teleportovanje neprijatelja ukoliko dodje do gornjeg portala */
+    if(enemy_current_z >= MAP_HEIGHT+2)
+      enemy->z_cord = 0;
+
     enemy_next_x = floor(enemy->x_cord) / 2;
     enemy_next_z = floor(-1*(enemy->z_cord - 2)) / 2;
 
+    /* Ukoliko se krece na gore i naidje na put i sa leve i sa desne strane, poziva se funkcija za odredjivanje pravca kretanja neprijatelja kako ne bi isao samo gore-dole */
     if(map[enemy_next_x-1][enemy_next_z] != 0)
       enemy_direction(enemy);
 
+    /* Ukoliko je pravac kretanja gore, pokusava gore, u suprotnom se ponovo poziva funkcija za odredjivanja pravca kretanja neprijatelja */
     if(map[enemy_next_x][enemy_next_z] != 0)
     {
       enemy->z_cord -= .15;
@@ -511,12 +539,18 @@ void move_enemy(m_Enemy* enemy)
       enemy_direction(enemy);
   } else if(enemy->movement == 's')
   {
+    /* Teleportovanje neprijatelja ukoliko dodje do donjeg portala */
+    if(enemy_current_z < 0)
+      enemy->z_cord = 2*MAP_HEIGHT+4;
+
     enemy_next_x = floor(enemy->x_cord) / 2;
     enemy_next_z = floor(-1*(enemy->z_cord + 2)) / 2;
 
-    if(map[enemy_next_x-1][enemy_next_z+1] != 0 || map[enemy_next_x+1][enemy_next_z+1] != 0)
+    /* Ukoliko se krece na dole i naidje na put i sa leve i sa desne strane, poziva se funkcija za odredjivanje pravca kretanja neprijatelja kako ne bi isao samo gore-dole */
+    if(map[enemy_next_x-1][enemy_next_z+1] != 0 )
       enemy_direction(enemy);
 
+    /* Ukoliko je pravac kretanja dole, pokusava dole, u suprotnom se ponovo poziva funkcija za odredjivanja pravca kretanja neprijatelja */
     if(map[enemy_next_x][enemy_next_z] != 0)
     {
       enemy->z_cord += .15;
@@ -528,6 +562,7 @@ void move_enemy(m_Enemy* enemy)
     enemy_next_x = floor(enemy->x_cord+2) / 2;
     enemy_next_z = floor(-1*enemy->z_cord) / 2;
 
+    /* Ukoliko je pravac kretanja desno, pokusava desno, u suprotnom se ponovo poziva funkcija za odredjivanja pravca kretanja neprijatelja */
     if(map[enemy_next_x][enemy_next_z] != 0)
     {
         enemy->x_cord += .15;
@@ -539,6 +574,7 @@ void move_enemy(m_Enemy* enemy)
     enemy_next_x = floor(enemy->x_cord - 2) / 2;
     enemy_next_z = floor(-1*enemy->z_cord) / 2;
 
+    /* Ukoliko je pravac kretanja levo, pokusava levo, u suprotnom se ponovo poziva funkcija za odredjivanja pravca kretanja neprijatelja */
     if(map[enemy_next_x][enemy_next_z] != 0)
     {
       enemy->x_cord -= .15;

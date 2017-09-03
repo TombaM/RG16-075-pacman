@@ -13,4 +13,5 @@ void draw_food1(float x_cord_translate, float y_cord_translate, float z_cord_tra
 void draw_player(float x_cord, float y_cord, float z_cord, float size_of_player, int rotation, int parameter);
 void draw_wall(float x, float y, float z);
 void draw_floor(float x, float y, float z);
-void draw_enemy(float x_cord, float y_cord, float z_cord, float size_of_enemy);
+void draw_enemy(float x_cord, float y_cord, float z_cord, float r_diff, float g_diff, float b_diff,
+float r_amb, float g_amb, float b_amb,float size_of_enemy);
