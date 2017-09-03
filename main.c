@@ -179,7 +179,6 @@ static void on_timer(int parameter)
   int player_current_x = floor(Player.x_cord) / 2;
   int player_current_z = floor(-1 * Player.z_cord) / 2;
 
-
   if(map[player_current_x][player_current_z] == 1) {
     map[player_current_x][player_current_z] = 2;
     score++;
@@ -198,10 +197,11 @@ static void on_timer(int parameter)
   if(Player.movement == 'w')
   {
     if(player_current_z == MAP_HEIGHT+1)
-      Player.z_cord += 2*MAP_HEIGHT+4;
-
-    player_next_x = ceil(Player.x_cord) / 2;
+      // Player.z_cord += 2*MAP_HEIGHT+4;
+      Player.z_cord = 1;
+    player_next_x = floor(Player.x_cord) / 2;
     player_next_z = floor(-1*(Player.z_cord - 1)) / 2;
+    printf("%i - %i\n%f.2 - %f.2\n%i - %i\n\n\n", player_current_x, player_current_z, Player.x_cord, Player.z_cord, player_next_x, player_next_z);
     if(map[player_next_x][player_next_z] != 0)
     {
       Player.z_cord -= .15;
@@ -213,9 +213,9 @@ static void on_timer(int parameter)
         Player.movement = 's';
   } else if(Player.movement == 's')
   {
-    if((-1*(Player.z_cord)/2) == 0)
-      Player.z_cord -= 2*MAP_HEIGHT+4;
-    player_next_x = ceil(Player.x_cord) / 2;
+    if(player_current_z == 0)
+      Player.z_cord -= 2*MAP_HEIGHT+3;
+    player_next_x = floor(Player.x_cord) / 2;
     player_next_z = floor(-1*(Player.z_cord + 1)) / 2;
     if(map[player_next_x][player_next_z] != 0)
     {
@@ -227,7 +227,7 @@ static void on_timer(int parameter)
         Player.movement = 'w';
   } else if(Player.movement == 'd')
   {
-    player_next_x = ceil(Player.x_cord) / 2;
+    player_next_x = floor(Player.x_cord+1) / 2;
     player_next_z = floor(-1*Player.z_cord) / 2;
     if(map[player_next_x][player_next_z] != 0)
     {
@@ -240,7 +240,7 @@ static void on_timer(int parameter)
         Player.movement = 'a';
   } else if(Player.movement == 'a')
   {
-    player_next_x = ceil(Player.x_cord - 1) / 2;
+    player_next_x = floor(Player.x_cord - 1) / 2;
     player_next_z = floor(-1*Player.z_cord) / 2;
     if(map[player_next_x][player_next_z] != 0)
     {
@@ -254,10 +254,12 @@ static void on_timer(int parameter)
 
   if(Enemy1.movement == 'w')
   {
-    enemy1_next_x = ceil(Enemy1.x_cord) / 2;
+    enemy1_next_x = floor(Enemy1.x_cord) / 2;
     enemy1_next_z = floor(-1*(Enemy1.z_cord - 2)) / 2;
-    if(map[enemy1_next_x-1][enemy1_next_z-1] != 0 || map[enemy1_next_x+1][enemy1_next_z-1] != 0)
+
+    if(map[enemy1_next_x-1][enemy1_next_z] != 0)
       enemy1_direction();
+
     if(map[enemy1_next_x][enemy1_next_z] != 0)
     {
       Enemy1.z_cord -= .15;
@@ -265,8 +267,12 @@ static void on_timer(int parameter)
       enemy1_direction();
   } else if(Enemy1.movement == 's')
   {
-    enemy1_next_x = ceil(Enemy1.x_cord) / 2;
+    enemy1_next_x = floor(Enemy1.x_cord) / 2;
     enemy1_next_z = floor(-1*(Enemy1.z_cord + 2)) / 2;
+
+    if(map[enemy1_next_x-1][enemy1_next_z+1] != 0 || map[enemy1_next_x+1][enemy1_next_z+1] != 0)
+      enemy1_direction();
+
     if(map[enemy1_next_x][enemy1_next_z] != 0)
     {
       Enemy1.z_cord += .15;
@@ -275,8 +281,9 @@ static void on_timer(int parameter)
       enemy1_direction();
   } else if(Enemy1.movement == 'd')
   {
-    enemy1_next_x = ceil(Enemy1.x_cord+2) / 2;
+    enemy1_next_x = floor(Enemy1.x_cord+2) / 2;
     enemy1_next_z = floor(-1*Enemy1.z_cord) / 2;
+
     if(map[enemy1_next_x][enemy1_next_z] != 0)
     {
         Enemy1.x_cord += .15;
@@ -285,8 +292,9 @@ static void on_timer(int parameter)
       enemy1_direction();
   } else if(Enemy1.movement == 'a')
   {
-    enemy1_next_x = ceil(Enemy1.x_cord - 2) / 2;
+    enemy1_next_x = floor(Enemy1.x_cord - 2) / 2;
     enemy1_next_z = floor(-1*Enemy1.z_cord) / 2;
+
     if(map[enemy1_next_x][enemy1_next_z] != 0)
     {
       Enemy1.x_cord -= .15;
@@ -294,12 +302,15 @@ static void on_timer(int parameter)
     else
       enemy1_direction();
   }
+
   if(Enemy2.movement == 'w')
   {
     enemy2_next_x = ceil(Enemy2.x_cord) / 2;
     enemy2_next_z = floor(-1*(Enemy2.z_cord - 2)) / 2;
+
     if(map[enemy2_next_x-1][enemy2_next_z-1] != 0 || map[enemy2_next_x+1][enemy2_next_z-1] != 0)
       enemy2_direction();
+
     if(map[enemy2_next_x][enemy2_next_z] != 0)
     {
       Enemy2.z_cord -= .15;
@@ -309,6 +320,10 @@ static void on_timer(int parameter)
   {
     enemy2_next_x = ceil(Enemy2.x_cord) / 2;
     enemy2_next_z = floor(-1*(Enemy2.z_cord + 2)) / 2;
+
+    if(map[enemy2_next_x-1][enemy2_next_z+1] != 0 || map[enemy2_next_x+1][enemy2_next_z+1] != 0)
+      enemy1_direction();
+
     if(map[enemy2_next_x][enemy2_next_z] != 0)
     {
       Enemy2.z_cord += .15;
@@ -319,6 +334,7 @@ static void on_timer(int parameter)
   {
     enemy2_next_x = ceil(Enemy2.x_cord+2) / 2;
     enemy2_next_z = floor(-1*Enemy2.z_cord) / 2;
+
     if(map[enemy2_next_x][enemy2_next_z] != 0)
     {
         Enemy2.x_cord += .15;
@@ -329,6 +345,7 @@ static void on_timer(int parameter)
   {
     enemy2_next_x = ceil(Enemy2.x_cord - 2) / 2;
     enemy2_next_z = floor(-1*Enemy2.z_cord) / 2;
+
     if(map[enemy2_next_x][enemy2_next_z] != 0)
     {
       Enemy2.x_cord -= .15;
@@ -340,8 +357,10 @@ static void on_timer(int parameter)
   {
     enemy3_next_x = ceil(Enemy3.x_cord) / 2;
     enemy3_next_z = floor(-1*(Enemy3.z_cord - 2)) / 2;
-    if(map[enemy3_next_x-1][enemy3_next_z-1] != 0 || map[enemy3_next_x+1][enemy3_next_z-1] != 0)
+
+    if(map[enemy3_next_x-1][enemy3_next_z] != 0 || map[enemy3_next_x+1][enemy3_next_z] != 0)
       enemy3_direction();
+
     if(map[enemy3_next_x][enemy3_next_z] != 0)
     {
       Enemy3.z_cord -= .15;
@@ -351,6 +370,10 @@ static void on_timer(int parameter)
   {
     enemy3_next_x = ceil(Enemy3.x_cord) / 2;
     enemy3_next_z = floor(-1*(Enemy3.z_cord + 2)) / 2;
+
+    if(map[enemy3_next_x-1][enemy3_next_z+1] != 0 || map[enemy3_next_x+1][enemy3_next_z+1] != 0)
+      enemy1_direction();
+
     if(map[enemy3_next_x][enemy3_next_z] != 0)
     {
       Enemy3.z_cord += .15;
@@ -361,6 +384,7 @@ static void on_timer(int parameter)
   {
     enemy3_next_x = ceil(Enemy3.x_cord+2) / 2;
     enemy3_next_z = floor(-1*Enemy3.z_cord) / 2;
+
     if(map[enemy3_next_x][enemy3_next_z] != 0)
     {
         Enemy3.x_cord += .15;
@@ -371,6 +395,7 @@ static void on_timer(int parameter)
   {
     enemy3_next_x = ceil(Enemy3.x_cord - 2) / 2;
     enemy3_next_z = floor(-1*Enemy3.z_cord) / 2;
+
     if(map[enemy3_next_x][enemy3_next_z] != 0)
     {
       Enemy3.x_cord -= .15;
