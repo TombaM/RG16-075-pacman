@@ -23,20 +23,6 @@ static void on_keyboard(unsigned char key, int x, int y);
 static void on_reshape(int width, int height);
 static void on_timer(int parameter);
 
-/* Deklaracija pomocnih funkcija */
-void get_map_pattern();
-void get_map_over_pattern();
-void light();
-void show_score();
-void show_exit();
-void check_end();
-void enemy1_direction();
-void enemy2_direction();
-void enemy3_direction();
-
-int player_horizontal = 0;
-int player_vertical = 0;
-
 /* Struktura za igraca */
 typedef struct
 {
@@ -46,6 +32,9 @@ typedef struct
   char movement;
 } m_Player;
 m_Player Player = {3, 0, -3, 'w'};
+
+int player_horizontal = 0;
+int player_vertical = 0;
 
 /* Struktura za neprijatelja */
 typedef struct _enemy
@@ -58,6 +47,17 @@ typedef struct _enemy
 m_Enemy Enemy1 = {23, 0, -19, 'w'};
 m_Enemy Enemy2 = {23, 0, -31, 's'};
 m_Enemy Enemy3 = {23, 0, -25, 'a'};
+
+/* Deklaracija pomocnih funkcija */
+void get_map_pattern();
+void get_map_over_pattern();
+void light();
+void show_score();
+void show_exit();
+void check_end();
+void enemy_direction(m_Enemy* enemy);
+void move_enemy(m_Enemy* enemy);
+void move_player();
 
 int rotate = 0;
 int score = 0;
@@ -173,236 +173,12 @@ static void on_timer(int parameter)
   if(game_started == 1)
     p += 1;
 
-
   check_end();
+  move_player();
+  move_enemy(&Enemy1);
+  move_enemy(&Enemy2);
+  move_enemy(&Enemy3);
 
-  int player_current_x = floor(Player.x_cord) / 2;
-  int player_current_z = floor(-1 * Player.z_cord) / 2;
-
-  if(map[player_current_x][player_current_z] == 1) {
-    map[player_current_x][player_current_z] = 2;
-    score++;
-  }
-
-
-  int player_next_x;
-  int player_next_z;
-  int enemy1_next_x;
-  int enemy1_next_z;
-  int enemy2_next_x;
-  int enemy2_next_z;
-  int enemy3_next_x;
-  int enemy3_next_z;
-
-  if(Player.movement == 'w')
-  {
-    if(player_current_z == MAP_HEIGHT+1)
-      // Player.z_cord += 2*MAP_HEIGHT+4;
-      Player.z_cord = 1;
-    player_next_x = floor(Player.x_cord) / 2;
-    player_next_z = floor(-1*(Player.z_cord - 1)) / 2;
-    printf("%i - %i\n%f.2 - %f.2\n%i - %i\n\n\n", player_current_x, player_current_z, Player.x_cord, Player.z_cord, player_next_x, player_next_z);
-    if(map[player_next_x][player_next_z] != 0)
-    {
-      Player.z_cord -= .15;
-      player_horizontal = 0;
-      player_vertical = 1;
-    }
-    else
-      if(player_vertical == 1)
-        Player.movement = 's';
-  } else if(Player.movement == 's')
-  {
-    if(player_current_z == 0)
-      Player.z_cord -= 2*MAP_HEIGHT+3;
-    player_next_x = floor(Player.x_cord) / 2;
-    player_next_z = floor(-1*(Player.z_cord + 1)) / 2;
-    if(map[player_next_x][player_next_z] != 0)
-    {
-      Player.z_cord += .15;
-      player_horizontal = 0;
-      player_vertical = 1;
-    }else
-      if(player_vertical == 1)
-        Player.movement = 'w';
-  } else if(Player.movement == 'd')
-  {
-    player_next_x = floor(Player.x_cord+1) / 2;
-    player_next_z = floor(-1*Player.z_cord) / 2;
-    if(map[player_next_x][player_next_z] != 0)
-    {
-        Player.x_cord += .15;
-        player_horizontal = 1;
-        player_vertical = 0;
-    }
-    else
-      if(player_horizontal == 1)
-        Player.movement = 'a';
-  } else if(Player.movement == 'a')
-  {
-    player_next_x = floor(Player.x_cord - 1) / 2;
-    player_next_z = floor(-1*Player.z_cord) / 2;
-    if(map[player_next_x][player_next_z] != 0)
-    {
-      Player.x_cord -= .15;
-      player_horizontal = 1;
-      player_vertical = 0;
-    }else
-      if(player_horizontal == 1)
-        Player.movement = 'd';
-  }
-
-  if(Enemy1.movement == 'w')
-  {
-    enemy1_next_x = floor(Enemy1.x_cord) / 2;
-    enemy1_next_z = floor(-1*(Enemy1.z_cord - 2)) / 2;
-
-    if(map[enemy1_next_x-1][enemy1_next_z] != 0)
-      enemy1_direction();
-
-    if(map[enemy1_next_x][enemy1_next_z] != 0)
-    {
-      Enemy1.z_cord -= .15;
-    } else
-      enemy1_direction();
-  } else if(Enemy1.movement == 's')
-  {
-    enemy1_next_x = floor(Enemy1.x_cord) / 2;
-    enemy1_next_z = floor(-1*(Enemy1.z_cord + 2)) / 2;
-
-    if(map[enemy1_next_x-1][enemy1_next_z+1] != 0 || map[enemy1_next_x+1][enemy1_next_z+1] != 0)
-      enemy1_direction();
-
-    if(map[enemy1_next_x][enemy1_next_z] != 0)
-    {
-      Enemy1.z_cord += .15;
-    }
-    else
-      enemy1_direction();
-  } else if(Enemy1.movement == 'd')
-  {
-    enemy1_next_x = floor(Enemy1.x_cord+2) / 2;
-    enemy1_next_z = floor(-1*Enemy1.z_cord) / 2;
-
-    if(map[enemy1_next_x][enemy1_next_z] != 0)
-    {
-        Enemy1.x_cord += .15;
-    }
-    else
-      enemy1_direction();
-  } else if(Enemy1.movement == 'a')
-  {
-    enemy1_next_x = floor(Enemy1.x_cord - 2) / 2;
-    enemy1_next_z = floor(-1*Enemy1.z_cord) / 2;
-
-    if(map[enemy1_next_x][enemy1_next_z] != 0)
-    {
-      Enemy1.x_cord -= .15;
-    }
-    else
-      enemy1_direction();
-  }
-
-  if(Enemy2.movement == 'w')
-  {
-    enemy2_next_x = ceil(Enemy2.x_cord) / 2;
-    enemy2_next_z = floor(-1*(Enemy2.z_cord - 2)) / 2;
-
-    if(map[enemy2_next_x-1][enemy2_next_z-1] != 0 || map[enemy2_next_x+1][enemy2_next_z-1] != 0)
-      enemy2_direction();
-
-    if(map[enemy2_next_x][enemy2_next_z] != 0)
-    {
-      Enemy2.z_cord -= .15;
-    } else
-      enemy2_direction();
-  } else if(Enemy2.movement == 's')
-  {
-    enemy2_next_x = ceil(Enemy2.x_cord) / 2;
-    enemy2_next_z = floor(-1*(Enemy2.z_cord + 2)) / 2;
-
-    if(map[enemy2_next_x-1][enemy2_next_z+1] != 0 || map[enemy2_next_x+1][enemy2_next_z+1] != 0)
-      enemy1_direction();
-
-    if(map[enemy2_next_x][enemy2_next_z] != 0)
-    {
-      Enemy2.z_cord += .15;
-    }
-    else
-      enemy2_direction();
-  } else if(Enemy2.movement == 'd')
-  {
-    enemy2_next_x = ceil(Enemy2.x_cord+2) / 2;
-    enemy2_next_z = floor(-1*Enemy2.z_cord) / 2;
-
-    if(map[enemy2_next_x][enemy2_next_z] != 0)
-    {
-        Enemy2.x_cord += .15;
-    }
-    else
-      enemy2_direction();
-  } else if(Enemy2.movement == 'a')
-  {
-    enemy2_next_x = ceil(Enemy2.x_cord - 2) / 2;
-    enemy2_next_z = floor(-1*Enemy2.z_cord) / 2;
-
-    if(map[enemy2_next_x][enemy2_next_z] != 0)
-    {
-      Enemy2.x_cord -= .15;
-    }
-    else
-      enemy2_direction();
-  }
-  if(Enemy3.movement == 'w')
-  {
-    enemy3_next_x = ceil(Enemy3.x_cord) / 2;
-    enemy3_next_z = floor(-1*(Enemy3.z_cord - 2)) / 2;
-
-    if(map[enemy3_next_x-1][enemy3_next_z] != 0 || map[enemy3_next_x+1][enemy3_next_z] != 0)
-      enemy3_direction();
-
-    if(map[enemy3_next_x][enemy3_next_z] != 0)
-    {
-      Enemy3.z_cord -= .15;
-    } else
-      enemy3_direction();
-  } else if(Enemy3.movement == 's')
-  {
-    enemy3_next_x = ceil(Enemy3.x_cord) / 2;
-    enemy3_next_z = floor(-1*(Enemy3.z_cord + 2)) / 2;
-
-    if(map[enemy3_next_x-1][enemy3_next_z+1] != 0 || map[enemy3_next_x+1][enemy3_next_z+1] != 0)
-      enemy1_direction();
-
-    if(map[enemy3_next_x][enemy3_next_z] != 0)
-    {
-      Enemy3.z_cord += .15;
-    }
-    else
-      enemy3_direction();
-  } else if(Enemy3.movement == 'd')
-  {
-    enemy3_next_x = ceil(Enemy3.x_cord+2) / 2;
-    enemy3_next_z = floor(-1*Enemy3.z_cord) / 2;
-
-    if(map[enemy3_next_x][enemy3_next_z] != 0)
-    {
-        Enemy3.x_cord += .15;
-    }
-    else
-      enemy3_direction();
-  } else if(Enemy3.movement == 'a')
-  {
-    enemy3_next_x = ceil(Enemy3.x_cord - 2) / 2;
-    enemy3_next_z = floor(-1*Enemy3.z_cord) / 2;
-
-    if(map[enemy3_next_x][enemy3_next_z] != 0)
-    {
-      Enemy3.x_cord -= .15;
-    }
-    else
-      enemy3_direction();
-  }
   glutPostRedisplay();
 
   if(game_started)
@@ -572,199 +348,201 @@ void check_end()
     over = 1;
   if(abs(Enemy2.x_cord - Player.x_cord) <= 1 && abs(Enemy2.z_cord - Player.z_cord) <= 1)
     over = 1;
+  if(abs(Enemy3.x_cord - Player.x_cord) <= 1 && abs(Enemy3.z_cord - Player.z_cord) <= 1)
+    over = 1;
 }
 
-void enemy1_direction()
+void enemy_direction(m_Enemy* enemy)
 {
-  /* Pomocna promenljiva koja se ponasa kao indikator da li se neprijatelj pomerio u trenitnom potezu ili ne */
-  // int moved = 0;
   /* Promenljiva koja nam odredjuje kretanje neprijatelja */
-  int enemy1_movement;
+  int enemy_movement;
 
   int levo = 0;
   int gore = 0;
 
-  if(Player.x_cord > Enemy1.x_cord)
+  if(Player.x_cord > enemy->x_cord)
     levo = 0;
   else
     levo = 1;
 
-  if(Player.z_cord < Enemy1.z_cord)
+  if(Player.z_cord < enemy->z_cord)
     gore = 1;
   else
     gore = 0;
 
-  enemy1_movement = rand() % 10;
+  enemy_movement = rand() % 10;
 
   if(levo && gore)
   {
-      if(enemy1_movement < 4)
-        Enemy1.movement = 'a';
-      else if(enemy1_movement >= 4 && enemy1_movement < 8)
-        Enemy1.movement = 'w';
-      else if(enemy1_movement == 8)
-        Enemy1.movement = 's';
-      else if(enemy1_movement == 9)
-        Enemy1.movement = 'd';
+      if(enemy_movement < 4)
+        enemy->movement = 'a';
+      else if(enemy_movement >= 4 && enemy_movement < 8)
+        enemy->movement = 'w';
+      else if(enemy_movement == 8)
+        enemy->movement = 's';
+      else if(enemy_movement == 9)
+        enemy->movement = 'd';
   } else if(levo && !gore)
   {
-    if(enemy1_movement < 4)
-      Enemy1.movement = 'a';
-    else if(enemy1_movement >= 4 && enemy1_movement < 8)
-      Enemy1.movement = 's';
-    else if(enemy1_movement == 8)
-      Enemy1.movement = 's';
-    else if(enemy1_movement == 9)
-      Enemy1.movement = 'w';
+    if(enemy_movement < 4)
+      enemy->movement = 'a';
+    else if(enemy_movement >= 4 && enemy_movement < 8)
+      enemy->movement = 's';
+    else if(enemy_movement == 8)
+      enemy->movement = 's';
+    else if(enemy_movement == 9)
+      enemy->movement = 'w';
   } else if(!levo && gore)
   {
-    if(enemy1_movement < 4)
-      Enemy1.movement = 'd';
-    else if(enemy1_movement >= 4 && enemy1_movement < 8)
-      Enemy1.movement = 'w';
-    else if(enemy1_movement == 8)
-      Enemy1.movement = 'a';
-    else if(enemy1_movement == 9)
-      Enemy1.movement = 'd';
+    if(enemy_movement < 4)
+      enemy->movement = 'd';
+    else if(enemy_movement >= 4 && enemy_movement < 8)
+      enemy->movement = 'w';
+    else if(enemy_movement == 8)
+      enemy->movement = 'a';
+    else if(enemy_movement == 9)
+      enemy->movement = 'd';
   } else if(!levo && !gore)
   {
-    if(enemy1_movement < 4)
-      Enemy1.movement = 'd';
-    else if(enemy1_movement >= 4 && enemy1_movement < 8)
-      Enemy1.movement = 's';
-    else if(enemy1_movement == 8)
-      Enemy1.movement = 'w';
-    else if(enemy1_movement == 9)
-      Enemy1.movement = 'a';
+    if(enemy_movement < 4)
+      enemy->movement = 'd';
+    else if(enemy_movement >= 4 && enemy_movement < 8)
+      enemy->movement = 's';
+    else if(enemy_movement == 8)
+      enemy->movement = 'w';
+    else if(enemy_movement == 9)
+      enemy->movement = 'a';
   }
 }
 
-void enemy2_direction()
+void move_player()
 {
-  /* Pomocna promenljiva koja se ponasa kao indikator da li se neprijatelj pomerio u trenitnom potezu ili ne */
-  // int moved = 0;
-  /* Promenljiva koja nam odredjuje kretanje neprijatelja */
-  int enemy2_movement;
+  int player_current_x = floor(Player.x_cord) / 2;
+  int player_current_z = floor(-1 * Player.z_cord) / 2;
 
-  int levo = 0;
-  int gore = 0;
+  if(map[player_current_x][player_current_z] == 1) {
+    map[player_current_x][player_current_z] = 2;
+    score++;
+  }
 
-  if(Player.x_cord > Enemy2.x_cord)
-    levo = 0;
-  else
-    levo = 1;
+  int player_next_x;
+  int player_next_z;
 
-  if(Player.z_cord < Enemy2.z_cord)
-    gore = 1;
-  else
-    gore = 0;
-
-  enemy2_movement = rand() % 10;
-
-  if(levo && gore)
+  if(Player.movement == 'w')
   {
-      if(enemy2_movement < 4)
-        Enemy2.movement = 'a';
-      else if(enemy2_movement >= 4 && enemy2_movement < 8)
-        Enemy2.movement = 'w';
-      else if(enemy2_movement == 8)
-        Enemy2.movement = 's';
-      else if(enemy2_movement == 9)
-        Enemy2.movement = 'd';
-  } else if(levo && !gore)
+    /* Ovo nam omogucava da se igrac teleportuje ukoliko dodje do gornjeg portala */
+    if(player_current_z == MAP_HEIGHT+1)
+      Player.z_cord = 1;
+
+    player_next_x = floor(Player.x_cord) / 2;
+    player_next_z = floor(-1*(Player.z_cord - 1)) / 2;
+    printf("%i - %i\n%f.2 - %f.2\n%i - %i\n\n\n", player_current_x, player_current_z, Player.x_cord, Player.z_cord, player_next_x, player_next_z);
+    if(map[player_next_x][player_next_z] != 0)
+    {
+      Player.z_cord -= .15;
+      player_horizontal = 0;
+      player_vertical = 1;
+    }
+    else
+      if(player_vertical == 1)
+        Player.movement = 's';
+  } else if(Player.movement == 's')
   {
-    if(enemy2_movement < 4)
-      Enemy2.movement = 'a';
-    else if(enemy2_movement >= 4 && enemy2_movement < 8)
-      Enemy2.movement = 's';
-    else if(enemy2_movement == 8)
-      Enemy2.movement = 's';
-    else if(enemy2_movement == 9)
-      Enemy2.movement = 'w';
-  } else if(!levo && gore)
+    /* Ovo nam omogucava da se igrac teleportuje ukoliko dodje do donjeg portala */
+    if(player_current_z == 0)
+      Player.z_cord -= 2*MAP_HEIGHT+3;
+
+    player_next_x = floor(Player.x_cord) / 2;
+    player_next_z = floor(-1*(Player.z_cord + 1)) / 2;
+    if(map[player_next_x][player_next_z] != 0)
+    {
+      Player.z_cord += .15;
+      player_horizontal = 0;
+      player_vertical = 1;
+    }else
+      if(player_vertical == 1)
+        Player.movement = 'w';
+  } else if(Player.movement == 'd')
   {
-    if(enemy2_movement < 4)
-      Enemy2.movement = 'd';
-    else if(enemy2_movement >= 4 && enemy2_movement < 8)
-      Enemy2.movement = 'w';
-    else if(enemy2_movement == 8)
-      Enemy2.movement = 'a';
-    else if(enemy2_movement == 9)
-      Enemy2.movement = 'd';
-  } else if(!levo && !gore)
+    player_next_x = floor(Player.x_cord+1) / 2;
+    player_next_z = floor(-1*Player.z_cord) / 2;
+    if(map[player_next_x][player_next_z] != 0)
+    {
+        Player.x_cord += .15;
+        player_horizontal = 1;
+        player_vertical = 0;
+    }
+    else
+      if(player_horizontal == 1)
+        Player.movement = 'a';
+  } else if(Player.movement == 'a')
   {
-    if(enemy2_movement < 4)
-      Enemy2.movement = 'd';
-    else if(enemy2_movement >= 4 && enemy2_movement < 8)
-      Enemy2.movement = 's';
-    else if(enemy2_movement == 8)
-      Enemy2.movement = 'w';
-    else if(enemy2_movement == 9)
-      Enemy2.movement = 'a';
+    player_next_x = floor(Player.x_cord - 1) / 2;
+    player_next_z = floor(-1*Player.z_cord) / 2;
+    if(map[player_next_x][player_next_z] != 0)
+    {
+      Player.x_cord -= .15;
+      player_horizontal = 1;
+      player_vertical = 0;
+    }else
+      if(player_horizontal == 1)
+        Player.movement = 'd';
   }
 }
 
-void enemy3_direction()
+void move_enemy(m_Enemy* enemy)
 {
-  /* Pomocna promenljiva koja se ponasa kao indikator da li se neprijatelj pomerio u trenitnom potezu ili ne */
-  // int moved = 0;
-  /* Promenljiva koja nam odredjuje kretanje neprijatelja */
-  int enemy3_movement;
+  int enemy_next_x;
+  int enemy_next_z;
 
-  int levo = 0;
-  int gore = 0;
-
-  if(Player.x_cord > Enemy3.x_cord)
-    levo = 0;
-  else
-    levo = 1;
-
-  if(Player.z_cord < Enemy3.z_cord)
-    gore = 1;
-  else
-    gore = 0;
-
-  enemy3_movement = rand() % 10;
-
-  if(levo && gore)
+  if(enemy->movement == 'w')
   {
-      if(enemy3_movement < 4)
-        Enemy3.movement = 'a';
-      else if(enemy3_movement >= 4 && enemy3_movement < 8)
-        Enemy3.movement = 'w';
-      else if(enemy3_movement == 8)
-        Enemy3.movement = 's';
-      else if(enemy3_movement == 9)
-        Enemy3.movement = 'd';
-  } else if(levo && !gore)
+    enemy_next_x = floor(enemy->x_cord) / 2;
+    enemy_next_z = floor(-1*(enemy->z_cord - 2)) / 2;
+
+    if(map[enemy_next_x-1][enemy_next_z] != 0)
+      enemy_direction(enemy);
+
+    if(map[enemy_next_x][enemy_next_z] != 0)
+    {
+      enemy->z_cord -= .15;
+    } else
+      enemy_direction(enemy);
+  } else if(enemy->movement == 's')
   {
-    if(enemy3_movement < 4)
-      Enemy3.movement = 'a';
-    else if(enemy3_movement >= 4 && enemy3_movement < 8)
-      Enemy3.movement = 's';
-    else if(enemy3_movement == 8)
-      Enemy3.movement = 's';
-    else if(enemy3_movement == 9)
-      Enemy3.movement = 'w';
-  } else if(!levo && gore)
+    enemy_next_x = floor(enemy->x_cord) / 2;
+    enemy_next_z = floor(-1*(enemy->z_cord + 2)) / 2;
+
+    if(map[enemy_next_x-1][enemy_next_z+1] != 0 || map[enemy_next_x+1][enemy_next_z+1] != 0)
+      enemy_direction(enemy);
+
+    if(map[enemy_next_x][enemy_next_z] != 0)
+    {
+      enemy->z_cord += .15;
+    }
+    else
+      enemy_direction(enemy);
+  } else if(enemy->movement == 'd')
   {
-    if(enemy3_movement < 4)
-      Enemy3.movement = 'd';
-    else if(enemy3_movement >= 4 && enemy3_movement < 8)
-      Enemy3.movement = 'w';
-    else if(enemy3_movement == 8)
-      Enemy3.movement = 'a';
-    else if(enemy3_movement == 9)
-      Enemy3.movement = 'd';
-  } else if(!levo && !gore)
+    enemy_next_x = floor(enemy->x_cord+2) / 2;
+    enemy_next_z = floor(-1*enemy->z_cord) / 2;
+
+    if(map[enemy_next_x][enemy_next_z] != 0)
+    {
+        enemy->x_cord += .15;
+    }
+    else
+      enemy_direction(enemy);
+  } else if(enemy->movement == 'a')
   {
-    if(enemy3_movement < 4)
-      Enemy3.movement = 'd';
-    else if(enemy3_movement >= 4 && enemy3_movement < 8)
-      Enemy3.movement = 's';
-    else if(enemy3_movement == 8)
-      Enemy3.movement = 'w';
-    else if(enemy3_movement == 9)
-      Enemy3.movement = 'a';
+    enemy_next_x = floor(enemy->x_cord - 2) / 2;
+    enemy_next_z = floor(-1*enemy->z_cord) / 2;
+
+    if(map[enemy_next_x][enemy_next_z] != 0)
+    {
+      enemy->x_cord -= .15;
+    }
+    else
+      enemy_direction(enemy);
   }
 }
