@@ -1,6 +1,6 @@
 PACMAN
 
-![Could not display screenshot](https://github.com/MATF-RG16/RG16-075-pacman/blob/master/Screenshots/ss8.png?raw=true)
+![Could not display screenshot](https://github.com/MATF-RG16/RG16-075-pacman/blob/master/Screenshots/ss9.png?raw=true)
 
 
 Game controls:
