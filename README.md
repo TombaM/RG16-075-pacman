@@ -4,11 +4,11 @@ PACMAN
 
 
 Game controls:
-- 'Space' - start game
+- 'Space' - start and pause game
 - 'Esc' - exit
 - 'w' - up
 - 'a' - left
 - 's' - down
 - 'd' - down
 
-Try to collect as much food as possible with avoiding ghosts on the map so you don't lose.
+This is a 3D version of the original Pacman game. The goal is to try to collect as much food as possible with avoiding enemies on the map.
