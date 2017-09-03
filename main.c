@@ -129,7 +129,8 @@ static void on_display(void) {
 
           if(map[i][j] == 1)
           {
-              draw_food(2*i+1, -1, -2*j-1.2, 0, 1, 1, p*2, 0.5);
+            draw_food1(2*i+1, -1, -2*j-1.2, 0, 1, 1, p*2, 0.5);
+            draw_food2(2*i+1, -1, -2*j-1.2, 0, 1, 1, p*2, 0.5);
           }
 		    }
 	    }

@@ -34,7 +34,7 @@ void draw_floor(float x, float y, float z)
 }
 
 /* Funkcija za iscrtavanje hrane po mapi */
-void draw_food(float x_cord_translate, float y_cord_translate, float z_cord_translate,
+void draw_food1(float x_cord_translate, float y_cord_translate, float z_cord_translate,
 							 float x_cord_rotate, float y_cord_rotate, float z_cord_rotate,
 							 float angle_of_rotation, float size_of_cube)
 {
@@ -48,6 +48,24 @@ void draw_food(float x_cord_translate, float y_cord_translate, float z_cord_tran
 		glTranslatef(x_cord_translate, y_cord_translate, z_cord_translate);
 		glRotatef(angle_of_rotation, x_cord_rotate, y_cord_rotate, z_cord_rotate);
 		glRotatef(80, 1, 1, 1);
+		glutSolidCube(size_of_cube);
+	glPopMatrix();
+}
+
+void draw_food2(float x_cord_translate, float y_cord_translate, float z_cord_translate,
+							 float x_cord_rotate, float y_cord_rotate, float z_cord_rotate,
+							 float angle_of_rotation, float size_of_cube)
+{
+	GLfloat diffuse_coeffs[] = { .6, .2, 0, 1 };
+	GLfloat ambient_coeffs[] = {.6, .2, 0, 1};
+
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+		glColor3f(1, 1, 0);
+		glTranslatef(x_cord_translate, y_cord_translate, z_cord_translate);
+		glRotatef(angle_of_rotation, x_cord_rotate, y_cord_rotate, z_cord_rotate);
+		glRotatef(0, 1, 1, 1);
 		glutSolidCube(size_of_cube);
 	glPopMatrix();
 }
